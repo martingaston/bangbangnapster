@@ -21,4 +21,8 @@ if __name__ == "__main__":
         IP, PORT = server.server_address
 
         print(f"🚀 Server running on {IP}:{PORT}")
-        server.serve_forever()
+
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            server.shutdown()

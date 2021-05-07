@@ -1,7 +1,7 @@
 import socket
 import sys
 
-HOST, PORT = "localhost", 5000
+HOST, PORT = "ec2-52-56-46-175.eu-west-2.compute.amazonaws.com", 5000
 data = " ".join(sys.argv[1:])
 
 # Create a socket (SOCK_STREAM means a TCP socket)
