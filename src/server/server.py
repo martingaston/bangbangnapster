@@ -4,6 +4,9 @@ import threading
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
+        # receive 2 bytes - length
+        # receive 2 bytes - function
+        # receive X bytes - payload
         self.data = self.request.recv(1024).strip()
         thread = threading.current_thread()
         print(f"{thread.name} | {self.client_address[0]} wrote:")
