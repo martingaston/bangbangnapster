@@ -1,0 +1,23 @@
+---
+- name: Deploy application
+  hosts: servers
+  vars:
+    install_path: '/home/{{ ansible_user_id }}/bangbangnapster'
+
+  tasks:
+  - name: Git checkout
+    ansible.builtin.git:
+      repo: 'https://github.com/martingaston/bangbangnapster.git'
+      dest: "{{ install_path }}"
+  
+  - name: Copy systemd service file
+    become: yes
+    ansible.builtin.template:
+      src: templates/napster.service.j2
+      dest: /lib/systemd/system/napster.service
+  
+  - name: Restart napster service
+    become: yes
+    ansible.builtin.systemd:
+      name: napster
+      state: restarted
