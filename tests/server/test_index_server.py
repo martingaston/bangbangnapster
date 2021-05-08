@@ -51,6 +51,21 @@ def test_can_search_the_index_server():
     assert result.user == user
 
 
+def test_can_search_the_index_server_with_multiple_results():
+    index_server = IndexServer()
+    file1, user1 = None, None
+    file2, user1 = None, None
+    index_server.add(file1, user1)
+    index_server.add(file2, user1)
+
+    [result1, result2] = index_server.search("generic band", "generic song")
+
+    assert result1.file == file1
+    assert result1.user == user1
+    assert result2.file == file2
+    assert result2.user == user1
+
+
 @pytest.mark.skip
 def test_cannot_search_with_a_quoted_string():
     index_server = IndexServer()
