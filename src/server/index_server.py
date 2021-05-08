@@ -23,7 +23,10 @@ class IndexServer:
     def remove(self, file: File, user: User) -> None:
         self.list.remove(IndexedFile(file, user))
 
-    def search(self, artist: str, title: str) -> List[IndexedFile]:
+    def search(self, artist: str, title: str = "") -> List[IndexedFile]:
+        if "'" in artist or "'" in title or '"' in artist or '"' in title:
+            return []
+
         result = [
             indexed_file
             for indexed_file in self.list

@@ -3,12 +3,12 @@ from src.payload_parser import parse_payload
 
 class File:
     def __init__(self, filename, md5, size_in_bytes, bitrate, frequency, time):
-        self.filename = filename
-        self.md5 = md5
-        self.size_in_bytes = size_in_bytes
-        self.bitrate = bitrate
-        self.frequency = frequency
-        self.time = time
+        self.filename: str = filename
+        self.md5: str = md5
+        self.size_in_bytes: int = size_in_bytes
+        self.bitrate: int = bitrate
+        self.frequency: int = frequency
+        self.time: int = time
 
     @classmethod
     def from_bytes(cls, byte_input: bytes):

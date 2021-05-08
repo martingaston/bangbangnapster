@@ -1,14 +1,16 @@
 import pytest
 from src.server.index_server import IndexServer
+from src.server.file import File
+from src.server.user import User
 
 
-def test_an_index_server_with_no_files_has_a_length_of_zero():
+def test_an_index_server_with_no_files_has_a_length_of_zero() -> None:
     index_server = IndexServer()
 
     assert len(index_server) == 0
 
 
-def test_can_add_a_file_to_the_index_server():
+def test_can_add_a_file_to_the_index_server() -> None:
     index_server = IndexServer()
     file = None
     user = None
@@ -42,7 +44,8 @@ def test_cannot_remove_a_file_that_does_not_exist_in_the_server():
 
 def test_can_search_the_index_server():
     index_server = IndexServer()
-    file, user = None, None
+    file = File("generic band - generic song.mp3", "abcd", 1234, 128, 44100, 120)
+    user = User("foobar2000", "abcd", 12345, 6600, "napster", 6)
     index_server.add(file, user)
 
     [result] = index_server.search("generic band", "generic song")
@@ -53,8 +56,17 @@ def test_can_search_the_index_server():
 
 def test_can_search_the_index_server_with_multiple_results():
     index_server = IndexServer()
-    file1, user1 = None, None
-    file2, user1 = None, None
+    file1 = File("generic band - generic song.mp3", "abcd", 1234, 128, 44100, 120)
+    file2 = File(
+        "generic band - difficult followup to generic song.mp3",
+        "abcd",
+        1234,
+        128,
+        44100,
+        120,
+    )
+    user1 = User("foobar2000", "abcd", 12345, 6600, "napster", 6)
+
     index_server.add(file1, user1)
     index_server.add(file2, user1)
 
@@ -66,12 +78,13 @@ def test_can_search_the_index_server_with_multiple_results():
     assert result2.user == user1
 
 
-@pytest.mark.skip
-def test_cannot_search_with_a_quoted_string():
+def test_cannot_search_with_a_quoted_string() -> None:
     index_server = IndexServer()
-    file, user = None, None
+    file = File("generic band - generic song.mp3", "abcd", 1234, 128, 44100, 120)
+    user = User("foobar2000", "abcd", 12345, 6600, "napster", 6)
+
     index_server.add(file, user)
 
-    result = index_server.search_filename("generic 'fun' song")
+    result = index_server.search("generic 'fun' band")
 
-    assert result == None
+    assert result == []
