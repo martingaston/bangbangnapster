@@ -6,7 +6,7 @@ def parse_payload(data: bytes) -> List[str]:
 
     in_string = False
     last_char_was_end_of_string = False
-    current = []
+    current: List[str] = []
 
     # concatenating a space at the end means we finish by pushing the final item in current to the parsed list
     for x in data.decode("ascii") + " ":
