@@ -24,4 +24,11 @@ class IndexServer:
         self.list.remove(IndexedFile(file, user))
 
     def search(self, artist: str, title: str) -> List[IndexedFile]:
-        return [IndexedFile(None, None)]
+        result = [
+            indexed_file
+            for indexed_file in self.list
+            if artist in indexed_file.file.filename
+            and title in indexed_file.file.filename
+        ]
+
+        return result
