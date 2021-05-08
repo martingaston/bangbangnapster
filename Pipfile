@@ -8,6 +8,8 @@ name = "pypi"
 [dev-packages]
 black = "*"
 pytest = "*"
+mypy = "*"
+pylint = "*"
 
 [requires]
 python_full_version = "3.8.7"
