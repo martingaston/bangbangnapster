@@ -12,7 +12,7 @@ mypy = "mypy --namespace-packages -p 'tests' -p 'src'"
 black = "*"
 pytest = "*"
 mypy = "*"
-pylint = "*"
+flake8 = "*"
 
 [requires]
 python_full_version = "3.8.7"
