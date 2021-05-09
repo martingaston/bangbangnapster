@@ -1,4 +1,4 @@
-from link_type import LinkType
+from src.link_type import LinkType
 from src.payload_parser import parse_payload
 
 
