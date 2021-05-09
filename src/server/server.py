@@ -5,13 +5,14 @@ from src.server.user import User
 from src.server.file import File
 from src.packet import Packet
 from src.packet_type import PacketType
+from typing import Optional
 
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         while True:
             packet = self._read_packet()
-            if packet.packet_length == 0:
+            if packet is None:
                 break
 
             thread = threading.current_thread()
@@ -23,12 +24,15 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             if response is not None:
                 self.request.sendall(bytes(response))
 
-    def _read_packet(self) -> Packet:
+    def _read_packet(self) -> Optional[Packet]:
         packet_length = self.request.recv(2)
         packet_type = int.from_bytes(self.request.recv(2), byteorder="little")
         packet_data = self.request.recv(
             int.from_bytes(packet_length, byteorder="little")
         )
+
+        if packet_length == b"" and packet_type == 0 and packet_data == b"":
+            return None
 
         return Packet(PacketType(packet_type), packet_data.decode("ascii"))
 
@@ -42,6 +46,16 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             file = File.from_bytes(packet.data)
             index_server.add(file, self.user)
             return None
+
+        if (
+            packet.packet_type
+            == PacketType.UNSHARE_ALL_FILES_FROM_THE_SHARED_FILE_INDEX
+        ):
+            index_server = IndexServer()
+            removed = index_server.remove_all(self.user)
+            return Packet(
+                PacketType.UNSHARE_ALL_FILES_FROM_THE_SHARED_FILE_INDEX, str(removed)
+            )
 
         if packet.packet_type == PacketType.SEARCH_QUERY_REQUEST:
             index_server = IndexServer()
