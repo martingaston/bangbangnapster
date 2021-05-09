@@ -22,29 +22,35 @@ class IndexServer:
         pass
 
     def add(self, file: File, user: User) -> None:
-        IndexServer.lock.acquire()
-        IndexServer.list.append(IndexedFile(file, user))
-        IndexServer.lock.release()
+        with IndexServer.lock:
+            IndexServer.list.append(IndexedFile(file, user))
 
     def __len__(self):
         return len(IndexServer.list)
 
     def remove(self, file: File, user: User) -> None:
-        IndexServer.lock.acquire()
-        IndexServer.list.remove(IndexedFile(file, user))
-        IndexServer.lock.release()
+        with IndexServer.lock:
+            IndexServer.list.remove(IndexedFile(file, user))
+
+    def remove_all(self, user: User) -> int:
+        with IndexServer.lock:
+            before = len(IndexServer.list)
+            new_list = [item for item in IndexServer.list if item.user != user]
+            IndexServer.list = new_list
+            after = len(IndexServer.list)
+
+        return before - after
 
     def search(self, artist: str, title: str = "") -> List[IndexedFile]:
         if "'" in artist or "'" in title or '"' in artist or '"' in title:
             return []
 
-        IndexServer.lock.acquire()
-        result = [
-            indexed_file
-            for indexed_file in IndexServer.list
-            if artist in indexed_file.file.filename
-            and title in indexed_file.file.filename
-        ]
-        IndexServer.lock.release()
+        with IndexServer.lock:
+            result = [
+                indexed_file
+                for indexed_file in IndexServer.list
+                if artist in indexed_file.file.filename
+                and title in indexed_file.file.filename
+            ]
 
         return result
