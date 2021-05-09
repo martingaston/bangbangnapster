@@ -1,3 +1,4 @@
+import ipaddress
 from src.link_type import LinkType
 from src.payload_parser import parse_payload
 
@@ -20,8 +21,8 @@ class User:
         return cls(
             nick=nick,
             password=password,
-            ip=ip,
-            port=port,
+            ip=int(ipaddress.IPv4Address("192.168.0.1")),
+            port=int(port),
             client_info=client_info,
-            link_type=LinkType(link_type),
+            link_type=LinkType(int(link_type)),
         )

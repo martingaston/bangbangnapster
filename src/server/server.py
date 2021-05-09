@@ -1,31 +1,46 @@
 import socketserver
 import threading
+from src.server.user import User
+from src.packet import Packet
+from src.packet_type import PacketType
 
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        # receive 2 bytes - length
-        # receive 2 bytes - function
-        # receive X bytes - payload
-        self.data = self.request.recv(1024).strip()
-        thread = threading.current_thread()
-        print(f"{thread.name} | {self.client_address[0]} wrote:")
-        print(self.data)
-        self.request.sendall(self.data.upper())
+        while True:
+            packet = self._read_packet()
+            if packet.packet_length == 0:
+                break
+
+            thread = threading.current_thread()
+            print(f"{thread.name} | {self.client_address[0]} wrote:")
+            print(packet)
+
+            response = self._handle_packet(packet)
+
+            if response is not None:
+                self.request.sendall(bytes(response))
+
+    def _read_packet(self) -> Packet:
+        packet_length = self.request.recv(2)
+        packet_type = int.from_bytes(self.request.recv(2), byteorder="little")
+        packet_data = self.request.recv(
+            int.from_bytes(packet_length, byteorder="little")
+        )
+
+        return Packet(PacketType(packet_type), packet_data.decode("ascii"))
+
+    def _handle_packet(self, packet: Packet) -> Packet:
+        if packet.packet_type == PacketType.REGISTERED_LOGIN_REQUEST:
+            self.user = User.from_bytes_and_ip(packet.data, self.client_address[0])
+            return Packet(PacketType.LOGIN_ACKNOWLEDGE, "noemailstored@here.com")
+
+        if packet.packet_type == PacketType.ADD_A_FILE_TO_SHARED_FILE_INDEX:
+            pass
+            return None
+
+        return Packet(PacketType.LOGOUT_OR_ERROR_MESSAGE_FROM_SERVER, "error")
 
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
-
-
-if __name__ == "__main__":
-    server = ThreadedTCPServer(("", 5000), MyTCPHandler)
-    with server:
-        IP, PORT = server.server_address
-
-        print(f"🚀 Server running on {IP}:{PORT}")
-
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            server.shutdown()
