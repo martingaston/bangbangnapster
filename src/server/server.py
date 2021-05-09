@@ -1,6 +1,8 @@
 import socketserver
 import threading
+from src.server.index_server import IndexServer
 from src.server.user import User
+from src.server.file import File
 from src.packet import Packet
 from src.packet_type import PacketType
 
@@ -36,8 +38,19 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             return Packet(PacketType.LOGIN_ACKNOWLEDGE, "noemailstored@here.com")
 
         if packet.packet_type == PacketType.ADD_A_FILE_TO_SHARED_FILE_INDEX:
-            pass
+            index_server = IndexServer()
+            file = File.from_bytes(packet.data)
+            index_server.add(file, self.user)
             return None
+
+        if packet.packet_type == PacketType.SEARCH_QUERY_REQUEST:
+            index_server = IndexServer()
+            results = index_server.search("generic song")
+            for result in results:
+                packet = Packet(PacketType.SEARCH_QUERY_RESULTS, str(result))
+                self.request.sendall(bytes(packet))
+
+            return Packet(PacketType.SEARCH_QUERY_RESULTS_END_NOTIFICATION, "")
 
         return Packet(PacketType.LOGOUT_OR_ERROR_MESSAGE_FROM_SERVER, "error")
 

@@ -9,19 +9,24 @@ class IndexedFile:
     file: File
     user: User
 
+    def __repr__(self) -> str:
+        return f'"{self.file.filename}" {self.file.md5} {self.file.size_in_bytes} {self.file.bitrate} {self.file.frequency} {self.file.time} {self.user.nick} {self.user.ip} {self.user.link_type.value}'
+
 
 class IndexServer:
+    list: List[IndexedFile] = []
+
     def __init__(self):
-        self.list: List[IndexedFile] = []
+        pass
 
     def add(self, file: File, user: User) -> None:
-        self.list.append(IndexedFile(file, user))
+        IndexServer.list.append(IndexedFile(file, user))
 
     def __len__(self):
-        return len(self.list)
+        return len(IndexServer.list)
 
     def remove(self, file: File, user: User) -> None:
-        self.list.remove(IndexedFile(file, user))
+        IndexServer.list.remove(IndexedFile(file, user))
 
     def search(self, artist: str, title: str = "") -> List[IndexedFile]:
         if "'" in artist or "'" in title or '"' in artist or '"' in title:
@@ -29,7 +34,7 @@ class IndexServer:
 
         result = [
             indexed_file
-            for indexed_file in self.list
+            for indexed_file in IndexServer.list
             if artist in indexed_file.file.filename
             and title in indexed_file.file.filename
         ]

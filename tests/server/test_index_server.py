@@ -4,14 +4,20 @@ from src.server.file import File
 from src.server.user import User
 
 
-def test_an_index_server_with_no_files_has_a_length_of_zero() -> None:
+@pytest.fixture
+def index_server():
     index_server = IndexServer()
+    IndexServer.list = []
+
+    return index_server
+
+
+def test_an_index_server_with_no_files_has_a_length_of_zero(index_server) -> None:
 
     assert len(index_server) == 0
 
 
-def test_can_add_a_file_to_the_index_server() -> None:
-    index_server = IndexServer()
+def test_can_add_a_file_to_the_index_server(index_server) -> None:
     file = None
     user = None
 
@@ -20,8 +26,7 @@ def test_can_add_a_file_to_the_index_server() -> None:
     assert len(index_server) == 1
 
 
-def test_can_remove_a_file_from_the_index_server():
-    index_server = IndexServer()
+def test_can_remove_a_file_from_the_index_server(index_server):
     file1, user1 = None, None
     file2, user2 = None, None
     index_server.add(file1, user1)
@@ -32,8 +37,7 @@ def test_can_remove_a_file_from_the_index_server():
     assert len(index_server) == 1
 
 
-def test_cannot_remove_a_file_that_does_not_exist_in_the_server():
-    index_server = IndexServer()
+def test_cannot_remove_a_file_that_does_not_exist_in_the_server(index_server):
     file, user = None, None
     file_not_on_index_server = 1
     index_server.add(file, user)
@@ -42,8 +46,7 @@ def test_cannot_remove_a_file_that_does_not_exist_in_the_server():
         index_server.remove(file_not_on_index_server, user)
 
 
-def test_can_search_the_index_server():
-    index_server = IndexServer()
+def test_can_search_the_index_server(index_server):
     file = File("generic band - generic song.mp3", "abcd", 1234, 128, 44100, 120)
     user = User("foobar2000", "abcd", 12345, 6600, "napster", 6)
     index_server.add(file, user)
@@ -54,8 +57,7 @@ def test_can_search_the_index_server():
     assert result.user == user
 
 
-def test_can_search_the_index_server_with_multiple_results():
-    index_server = IndexServer()
+def test_can_search_the_index_server_with_multiple_results(index_server):
     file1 = File("generic band - generic song.mp3", "abcd", 1234, 128, 44100, 120)
     file2 = File(
         "generic band - difficult followup to generic song.mp3",
@@ -78,8 +80,7 @@ def test_can_search_the_index_server_with_multiple_results():
     assert result2.user == user1
 
 
-def test_cannot_search_with_a_quoted_string() -> None:
-    index_server = IndexServer()
+def test_cannot_search_with_a_quoted_string(index_server) -> None:
     file = File("generic band - generic song.mp3", "abcd", 1234, 128, 44100, 120)
     user = User("foobar2000", "abcd", 12345, 6600, "napster", 6)
 
