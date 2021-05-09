@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import struct
 from src.packet_type import PacketType
+from typing import Optional
 
 
 @dataclass
@@ -25,3 +26,14 @@ class Packet:
 def _int_to_napster_bytes(num: int) -> bytes:
     LITTLE_ENDIAN_UNSIGNED_SHORT = "<H"
     return struct.pack(LITTLE_ENDIAN_UNSIGNED_SHORT, num)
+
+
+def read_packet(socket) -> Optional[Packet]:
+    packet_length = socket.recv(2)
+    packet_type = int.from_bytes(socket.recv(2), byteorder="little")
+    packet_data = socket.recv(int.from_bytes(packet_length, byteorder="little"))
+
+    if packet_length == b"" and packet_type == 0 and packet_data == b"":
+        return None
+
+    return Packet(PacketType(packet_type), packet_data.decode("ascii"))

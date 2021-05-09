@@ -3,15 +3,14 @@ import threading
 from src.server.index_server import IndexServer
 from src.server.user import User
 from src.server.file import File
-from src.packet import Packet
+from src.packet import Packet, read_packet
 from src.packet_type import PacketType
-from typing import Optional
 
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         while True:
-            packet = self._read_packet()
+            packet = read_packet(self.request)
             if packet is None:
                 break
 
@@ -23,18 +22,6 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
             if response is not None:
                 self.request.sendall(bytes(response))
-
-    def _read_packet(self) -> Optional[Packet]:
-        packet_length = self.request.recv(2)
-        packet_type = int.from_bytes(self.request.recv(2), byteorder="little")
-        packet_data = self.request.recv(
-            int.from_bytes(packet_length, byteorder="little")
-        )
-
-        if packet_length == b"" and packet_type == 0 and packet_data == b"":
-            return None
-
-        return Packet(PacketType(packet_type), packet_data.decode("ascii"))
 
     def _handle_packet(self, packet: Packet) -> Packet:
         if packet.packet_type == PacketType.REGISTERED_LOGIN_REQUEST:
