@@ -3,10 +3,16 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[scripts]
+mypy = "mypy --namespace-packages -p 'tests' -p 'src'"
+
 [packages]
 
 [dev-packages]
 black = "*"
+pytest = "*"
+mypy = "*"
+flake8 = "*"
 
 [requires]
 python_full_version = "3.8.7"
