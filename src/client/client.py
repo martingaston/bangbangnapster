@@ -1,10 +1,11 @@
 import socket
+import socketserver
 
 from src.packet import Packet, read_packet
 from src.packet_type import PacketType
 from typing import Optional
-from time import sleep
 import threading
+from functools import partial
 
 # HOST, PORT = "ec2-52-56-46-175.eu-west-2.compute.amazonaws.com", 5000
 packet_data = b'\x1d\x00\x02\x00foo badpass 6699 "nap v0.8" 3'
@@ -13,10 +14,24 @@ search_request = b"\x07\x00\xC8\x00generic"
 unshare_all = b"\x00\x00\x6E\x00"
 
 
+class PeerServerHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        with open("shared/test.txt", "rb") as f:
+            for chunk in iter(partial(f.read, 1024), b""):
+                self.request.sendall(chunk)
+
+
+class PeerTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
+
+
 def peer_server():
-    while True:
-        print("threads!")
-        sleep(2)
+    server = PeerTCPServer(("", 0), PeerServerHandler)
+    with server:
+        IP, PORT = server.server_address
+        print(f"🤝 Peer server active on {IP}:{PORT}")
+
+        server.serve_forever()
 
 
 class Client:
