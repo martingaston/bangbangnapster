@@ -5,18 +5,26 @@ import struct
 from src.packet import Packet, read_packet
 from src.packet_type import PacketType
 from src.client.search_result import SearchResult
+from pathlib import Path
 from typing import Optional
 import threading
 from functools import partial
+from hashlib import md5
 
 # HOST, PORT = "ec2-52-56-46-175.eu-west-2.compute.amazonaws.com", 5000
 
 
 class PeerServerHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        with open("shared/test.txt", "rb") as f:
-            for chunk in iter(partial(f.read, 1024), b""):
-                self.request.sendall(chunk)
+        self.request: socket.socket
+        self.request.sendall(b"1")
+        filename = self.request.recv(1024).decode("ascii")
+        path = Path("shared").joinpath(filename)
+
+        if path.exists():
+            with open(path, "rb") as f:
+                for chunk in iter(partial(f.read, 1024), b""):
+                    self.request.sendall(chunk)
 
 
 class PeerTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -70,8 +78,16 @@ class Client:
         exit(0)
 
     def _share_all_files(self):
-        mp3_data = b'\x5d\x00\x64\x00"generic band - generic song.mp3" b92870e0d41bc8e698cf2f0a1ddfeac7-443008 443332 128 44100 60'
-        self.sock.sendall(mp3_data)
+        library = Path.cwd().joinpath("shared").glob("*.mp3")
+
+        for mp3 in library:
+            mp3_bytes = mp3.read_bytes()
+            hash = md5(mp3_bytes).hexdigest()
+            packet = Packet(
+                PacketType.ADD_A_FILE_TO_SHARED_FILE_INDEX,
+                f'"{mp3.name}" {hash} {len(mp3_bytes)} 128 44100 60',
+            )
+            self.sock.sendall(bytes(packet))
 
     def _main_menu(self):
         print("Select an option:")
@@ -135,8 +151,13 @@ class Client:
     def _download(self, result: SearchResult):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((str(result.ip), 6699))
+            ack = sock.recv(1)
+            if ack.decode("ascii") == "1":
+                print("connected")
 
-            with open(f"shared/{result.filename}", "ab") as f:
+            sock.send(bytes(result.filename.encode("ascii")))
+
+            with open(f"shared/download-{result.filename}", "ab") as f:
                 f.seek(0, 0)
                 f.truncate()
 

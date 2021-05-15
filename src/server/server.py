@@ -46,7 +46,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         if packet.packet_type == PacketType.SEARCH_QUERY_REQUEST:
             index_server = IndexServer()
-            results = index_server.search("generic song")
+            results = index_server.search(packet.data.decode("ascii"))
             for result in results:
                 packet = Packet(PacketType.SEARCH_QUERY_RESULTS, str(result))
                 self.request.sendall(bytes(packet))
