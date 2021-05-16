@@ -1,4 +1,5 @@
 import pytest
+from src.link_type import LinkType
 from src.server.index_server import IndexServer
 from src.server.file import File
 from src.server.user import User
@@ -19,7 +20,7 @@ def file():
 
 @pytest.fixture
 def user():
-    return User("foobar2000", "abcd", 12345, 6600, "napster", 6)
+    return User("foobar2000", "abcd", 12345, 6600, "napster", LinkType.T3_OR_GREATER)
 
 
 def test_an_index_server_with_no_files_has_a_length_of_zero(index_server) -> None:

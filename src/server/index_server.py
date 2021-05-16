@@ -21,7 +21,6 @@ class IndexServer:
 
     def add(self, file: File, user: User) -> None:
         IndexServer.list.append(IndexedFile(file, user))
-        print(IndexServer.list)
 
     def __len__(self):
         return len(IndexServer.list)
