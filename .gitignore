@@ -1,3 +1,5 @@
+shared/*
+
 # Ansible hosts
 hosts
 

@@ -13,7 +13,7 @@ class User:
         self.link_type: LinkType = link_type
 
     @classmethod
-    def from_bytes_and_ip(cls, bytes_input: bytes, ip):
+    def from_bytes_and_ip(cls, bytes_input: bytes, ip: str):
         parsed = parse_payload(bytes_input)
 
         [nick, password, port, client_info, link_type] = parsed
@@ -21,7 +21,7 @@ class User:
         return cls(
             nick=nick,
             password=password,
-            ip=int(ipaddress.IPv4Address("192.168.0.1")),
+            ip=int(ipaddress.IPv4Address(ip)),
             port=int(port),
             client_info=client_info,
             link_type=LinkType(int(link_type)),
