@@ -150,6 +150,7 @@ class Client:
 
     def _download(self, result: SearchResult):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            print(f"ip: {str(result.ip)}")
             sock.connect((str(result.ip), 6699))
             ack = sock.recv(1)
             if ack.decode("ascii") == "1":
@@ -163,6 +164,7 @@ class Client:
 
                 while True:
                     received = sock.recv(1024)
+                    print(received)
                     if received == b"":
                         break
 

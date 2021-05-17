@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User={{ ansible_user_id }}
-ExecStart=/usr/bin/python3 {{ install_path }}/server/server.py
+ExecStart=/usr/bin/python3 {{ install_path }}/server.py
 Restart=on-failure
 
 [Install]
