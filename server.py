@@ -1,7 +1,7 @@
 from src.server.server import ThreadedTCPServer, MyTCPHandler
 
 if __name__ == "__main__":
-    server = ThreadedTCPServer(("", 5000), MyTCPHandler)
+    server = ThreadedTCPServer(("", 7777), MyTCPHandler)
     with server:
         IP, PORT = server.server_address
 
