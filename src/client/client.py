@@ -2,6 +2,7 @@ import socket
 import socketserver
 import struct
 
+from src.client.name_generator import generate_username
 from src.packet import Packet, read_packet
 from src.packet_type import PacketType
 from src.client.search_result import SearchResult
@@ -56,7 +57,9 @@ class Client:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             self.sock = sock
             sock.connect((self.host, self.port))
-            print("!!napster")
+
+            motd = Path.cwd().joinpath("src", "client", "motd").read_text()
+            print(motd)
 
             # login
             self._login()
@@ -65,8 +68,9 @@ class Client:
             self._main_menu()
 
     def _login(self):
-        packet_data = b'\x1d\x00\x02\x00foo badpass 6699 "nap v0.8" 3'
-        self.sock.sendall(packet_data)
+        data = f'{generate_username()} nopass 6699 "bangbangnapster 0.1" 3'
+        packet = Packet(PacketType.REGISTERED_LOGIN_REQUEST, data)
+        self.sock.sendall(bytes(packet))
         logged_in = read_packet(self.sock)
         if logged_in.packet_type != PacketType.LOGIN_ACKNOWLEDGE:
             print("failed to login, exiting")
@@ -150,28 +154,25 @@ class Client:
 
     def _download(self, result: SearchResult):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            print(f"ip: {str(result.ip)}")
             sock.connect((str(result.ip), 6699))
             ack = sock.recv(1)
             if ack.decode("ascii") == "1":
-                print("connected")
+                print(
+                    f"☎️  connected to {result.ip}, attempting to download {result.filename}"
+                )
 
             sock.send(bytes(result.filename.encode("ascii")))
 
-            with open(f"shared/download-{result.filename}", "ab") as f:
-                f.seek(0, 0)
-                f.truncate()
-
+            with open(f"shared/{result.filename}", "wb") as f:
                 while True:
                     received = sock.recv(1024)
-                    print(received)
                     if received == b"":
                         break
 
                     f.write(received)
 
         print(
-            f"downloading of {result.filename} from {result.nick} ({result.size} bytes) complete"
+            f"🎉  download of {result.filename} from {result.nick} ({result.size} bytes) complete"
         )
 
         self._main_menu()
