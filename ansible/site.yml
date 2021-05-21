@@ -1,42 +1,35 @@
 ---
-- name: Deploy application
-  hosts: all
+- name: Deploy Servers
+  hosts: servers
   vars:
-    install_path: '/home/{{ ansible_user_id }}/bangbangnapster'
+    install_path: '/home/{{ ansible_user_id }}/bangbangnapsterserver'
 
   tasks:
   - name: Git checkout
     ansible.builtin.git:
       repo: 'https://github.com/martingaston/bangbangnapster.git'
       dest: "{{ install_path }}"
-  
-- name: Start Servers
-  tasks:
+
   - name: Copy systemd service file
     become: yes
     ansible.builtin.template:
       src: templates/napster_server.service.j2
       dest: /lib/systemd/system/napster_server.service
-  
+
   - name: Restart napster service
     become: yes
     ansible.builtin.systemd:
-      name: napster
+      name: napster_server
       state: restarted
       daemon-reload: yes
 
-- name: Start Clients
+- name: Deploy Clients
+  hosts: clients
+  vars:
+    install_path: '/home/{{ ansible_user_id }}/bangbangnapsterclient'
+
   tasks:
-  - name: Copy systemd service file
-    become: yes
-    ansible.builtin.template:
-      src: templates/napster_client.service.j2
-      dest: /lib/systemd/system/napster_client.service
-  
-  - name: Restart napster service
-    become: yes
-    ansible.builtin.systemd:
-      name: napster
-      state: restarted
-      daemon-reload: yes
-
+  - name: Git checkout
+    ansible.builtin.git:
+      repo: 'https://github.com/martingaston/bangbangnapster.git'
+      dest: "{{ install_path }}"
