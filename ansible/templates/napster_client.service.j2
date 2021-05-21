@@ -1,0 +1,12 @@
+[Unit]
+Description=Napster Client for !!Con2021!
+After=network.target
+
+[Service]
+Type=simple
+User={{ ansible_user_id }}
+ExecStart=/usr/bin/python3 {{ install_path }}/client.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
